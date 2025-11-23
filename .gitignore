@@ -1,0 +1,48 @@
+# ---- Node / Next.js ----
+node_modules/
+.next/
+out/
+dist/
+build/
+.cache/
+
+# ---- Environment (IGNORE ALL ENV FILES) ----
+.env
+.env.*
+.env*
+
+# ---- Keep only README.md, ignore all other md ----
+*.md
+!README.md
+
+# ---- Logs ----
+*.log
+logs/
+
+# ---- System files ----
+.DS_Store
+Thumbs.db
+
+# ---- Editor ----
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+
+# ---- Database junk ----
+*.sqlite
+*.db
+*.db-shm
+*.db-wal
+
+# ---- Debug / Test Scripts ----
+check-models.js
+check-models-with-env.js
+gemini_test.js
+file_list.txt
+
+# ---- Package managers ----
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
