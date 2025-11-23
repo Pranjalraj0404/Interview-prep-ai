@@ -1,10 +1,6 @@
 # ---- Node / Next.js ----
 node_modules/
 .next/
-out/
-dist/
-build/
-.cache/
 
 # ---- Environment (IGNORE ALL ENV FILES) ----
 .env
@@ -14,10 +10,7 @@ build/
 # ---- Keep only README.md, ignore all other md ----
 *.md
 !README.md
-
-# ---- Logs ----
-*.log
-logs/
+s/
 
 # ---- System files ----
 .DS_Store
