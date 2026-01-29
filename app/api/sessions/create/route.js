@@ -44,6 +44,7 @@ export async function POST(req) {
       )
     }
 
+    let createdQuestions = []
     if (Array.isArray(questions) && questions.length > 0) {
       const questionInserts = questions.map((q) => ({
         session_id: newSession.id,
@@ -53,18 +54,25 @@ export async function POST(req) {
         created_at: new Date().toISOString(),
       }))
 
-      const { error: questionsError } = await supabaseAdmin
+      const { data: insertedQuestions, error: questionsError } = await supabaseAdmin
         .from("questions")
         .insert(questionInserts)
+        .select()
 
       if (questionsError) {
         console.error("Questions creation error:", questionsError)
+      } else if (insertedQuestions) {
+        createdQuestions = insertedQuestions
       }
     }
 
     return NextResponse.json({
       success: true,
-      session: { ...newSession, _id: newSession.id },
+      session: { 
+        ...newSession, 
+        _id: newSession.id, 
+        questions: createdQuestions 
+      },
     })
   } catch (error) {
     console.error("Create Session Error:", error)

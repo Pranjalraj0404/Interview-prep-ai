@@ -55,17 +55,38 @@ Return strictly valid JSON array where each item is {"question":"...","answer":"
       if (
         apiError.message?.includes("404") ||
         apiError.message?.includes("not found") ||
-        apiError.message?.includes("not available")
+        apiError.message?.includes("not available") ||
+        apiError.message?.includes("429") ||
+        apiError.message?.includes("quota")
       ) {
+        console.warn(`Primary model failed with ${apiError.message}. Attempting fallbacks...`);
+        
         for (let i = 1; i < modelNames.length; i++) {
           try {
+            // Add a small delay before retrying to avoid hitting rate limits immediately
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            console.log(`Trying fallback model: ${modelNames[i]}`);
             model = genAI.getGenerativeModel({ model: modelNames[i] });
             const result = await model.generateContent(prompt);
             const response = await result.response;
             rawText = response.text();
             break;
           } catch (fallbackError) {
-            if (i === modelNames.length - 1) throw apiError;
+            console.warn(`Fallback model ${modelNames[i]} failed:`, fallbackError.message);
+            if (i === modelNames.length - 1) {
+              // If all models fail, check if it was a quota error
+              if (
+                apiError.message?.includes("429") || 
+                apiError.message?.includes("quota") ||
+                fallbackError.message?.includes("429") ||
+                fallbackError.message?.includes("quota")
+              ) {
+                 // Return a specific error structure that we can handle gracefully
+                 throw new Error("QUOTA_EXCEEDED");
+              }
+              throw apiError;
+            }
           }
         }
       } else {
@@ -108,7 +129,18 @@ Return strictly valid JSON array where each item is {"question":"...","answer":"
       return NextResponse.json({ message: "Invalid Gemini API key" }, { status: 400 });
     }
     if (msg.includes("quota") || msg.includes("QUOTA_EXCEEDED")) {
-      return NextResponse.json({ message: "API quota exceeded" }, { status: 429 });
+      console.warn("API quota exceeded. Returning fallback questions.");
+      // Fallback generation when quota is exceeded
+      const body = await request.clone().json().catch(() => ({}));
+      const role = body.role || "Software Engineer";
+      const topics = body.topicsToFocus || "General";
+      const count = Math.max(1, Math.min(parseInt(body.numberOfQuestions) || 10, 25));
+
+      const fallback = Array.from({ length: count }).map((_, i) => ({
+        question: `(Offline Mode) ${role} Question ${i + 1} about ${topics}`,
+        answer: "This question was generated in offline mode because the AI service is currently busy. Please try again later for AI-powered questions.",
+      }));
+      return NextResponse.json(fallback);
     }
     return NextResponse.json({ message: "Server error" }, { status: 500 });
   }

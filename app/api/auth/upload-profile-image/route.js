@@ -57,7 +57,12 @@ export async function POST(req) {
         .select()
         .single()
 
-      if (error || !user) {
+      if (error) {
+        console.error("Database update error:", error)
+        return NextResponse.json({ message: `Database error: ${error.message}` }, { status: 500 })
+      }
+
+      if (!user) {
         return NextResponse.json({ message: "User not found" }, { status: 404 })
       }
 

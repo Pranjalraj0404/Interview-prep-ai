@@ -1,16 +1,34 @@
 # ---- Node / Next.js ----
 node_modules/
 .next/
+out/
+dist/
 
-# ---- Environment (IGNORE ALL ENV FILES) ----
+# ---- Environment (ignore secrets) ----
 .env
-.env.*
-.env*
+.env.local
+.env.*.local
 
-# ---- Keep only README.md, ignore all other md ----
-*.md
-!README.md
-s/
+# ---- Markdown (ignore debug notes only) ----
+ATS_FRIENDLY_POINTS.md
+CHECK_DATABASE.md
+DATABASE_SCHEMA.md
+DEBUG_SESSIONS.md
+FIX_LOGIN.md
+FIX_SESSION_CREATION.md
+FIX_SESSION_DISPLAY.md
+FIX_QUESTIONS_DISPLAY.sql
+FIX_SESSIONS_TABLE.sql
+GEMINI_MODEL_FIX.md
+MODEL_FIX_SUMMARY.md
+PROJECT_REPAIR_SUMMARY.md
+QUICK_FIX.md
+QUICK_FIX_DATABASE.md
+SESSION_DISPLAY_FIX.md
+TEST_DATABASE.md
+TROUBLESHOOTING.md
+file_list.txt
+folder-structure.txt
 
 # ---- System files ----
 .DS_Store
@@ -32,9 +50,8 @@ Thumbs.db
 check-models.js
 check-models-with-env.js
 gemini_test.js
-file_list.txt
 
-# ---- Package managers ----
+# ---- Logs ----
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

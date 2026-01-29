@@ -102,14 +102,22 @@ export async function POST(request) {
     } catch (apiError) {
       console.error("Gemini API call failed with primary model:", apiError);
       
-      // If model not found error, try other models
-      if (apiError.message?.includes("404") || 
-          apiError.message?.includes("not found") || 
-          apiError.message?.includes("not available")) {
+      // If model not found error or other potentially recoverable errors, try other models
+      if (
+        apiError.message?.includes("404") || 
+        apiError.message?.includes("not found") || 
+        apiError.message?.includes("not available") ||
+        apiError.message?.includes("429") ||
+        apiError.message?.includes("quota")
+      ) {
+        console.warn(`Primary model failed with ${apiError.message}. Attempting fallbacks...`);
         
         // Try fallback models
         for (let i = 1; i < modelNames.length; i++) {
           try {
+            // Add a small delay before retrying
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
             console.log(`Trying fallback model: ${modelNames[i]}`);
             model = genAI.getGenerativeModel({ model: modelNames[i] });
             result = await model.generateContent(prompt);
@@ -120,6 +128,16 @@ export async function POST(request) {
           } catch (fallbackError) {
             console.warn(`Fallback model ${modelNames[i]} failed:`, fallbackError.message);
             if (i === modelNames.length - 1) {
+              // If all models fail, check if it was a quota error
+              if (
+                apiError.message?.includes("429") || 
+                apiError.message?.includes("quota") ||
+                fallbackError.message?.includes("429") ||
+                fallbackError.message?.includes("quota")
+              ) {
+                 throw new Error("QUOTA_EXCEEDED");
+              }
+              
               // All models failed
               return NextResponse.json(
                 {
@@ -189,12 +207,12 @@ export async function POST(request) {
     }
 
     if (msg.includes("quota") || msg.includes("QUOTA_EXCEEDED")) {
+      console.warn("API quota exceeded. Returning fallback explanation.");
       return NextResponse.json(
         {
-          message: "API quota exceeded. Please try again later.",
-          error: "QUOTA_EXCEEDED",
-        },
-        { status: 429 }
+          title: "Explanation Unavailable (Offline Mode)",
+          explanation: "The AI service is currently unavailable due to high traffic or quota limits. Please try again later to get a detailed AI-powered explanation for this question."
+        }
       );
     }
 

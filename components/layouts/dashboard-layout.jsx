@@ -78,7 +78,8 @@ export function DashboardLayout({ children }) {
       })
 
       if (!response.ok) {
-        throw new Error("Failed to upload image")
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || "Failed to upload image")
       }
 
       const data = await response.json()
@@ -92,7 +93,7 @@ export function DashboardLayout({ children }) {
       console.error("Error uploading image:", error)
       toast({
         title: "Upload failed",
-        description: "Failed to upload profile image. Please try again.",
+        description: error.message || "Failed to upload profile image. Please try again.",
         variant: "destructive",
       })
     } finally {
