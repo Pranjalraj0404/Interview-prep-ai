@@ -3,24 +3,35 @@
 import { NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
-import { supabase } from "@/lib/supabase"
+import connectDB from "@/lib/db"
+import User from "@/models/User"
+import { mockDb } from "@/lib/mock-db"
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(req) {
   try {
+    const db = await connectDB()
     const { email, password } = await req.json()
 
-    // Find user in Supabase
-    const { data: user, error } = await supabase.from("users").select("*").eq("email", email).single()
+    let user;
 
-    if (error || !user) {
+    // --- MOCK DB MODE ---
+    if (!db) {
+        console.log("Mock DB Mode: Logging in user");
+        user = await mockDb.findUserByEmail(email);
+    } else {
+        // Find user in MongoDB
+        user = await User.findOne({ email })
+    }
+    // --------------------
+
+    if (!user) {
       return NextResponse.json({ message: "Invalid email or password" }, { status: 401 })
     }
 
     // Check password
-    const passwordHash = user.password_hash || user.password
-    const isPasswordValid = await bcrypt.compare(password, passwordHash)
+    const isPasswordValid = await bcrypt.compare(password, user.password)
     if (!isPasswordValid) {
       return NextResponse.json({ message: "Invalid email or password" }, { status: 401 })
     }
@@ -33,10 +44,10 @@ export async function POST(req) {
         { status: 500 },
       )
     }
-    const token = jwt.sign({ userId: user.id }, secret, { expiresIn: "30d" })
+    const token = jwt.sign({ userId: user._id.toString() }, secret, { expiresIn: "30d" })
 
     return NextResponse.json({
-      _id: user.id,
+      _id: user._id,
       name: user.name,
       email: user.email,
       profileImageUrl: user.profile_image_url || null,

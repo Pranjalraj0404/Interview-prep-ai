@@ -2,12 +2,14 @@
 // Always returns valid JSON responses
 import { NextResponse } from "next/server"
 import jwt from "jsonwebtoken"
-import { supabase } from "@/lib/supabase"
+import connectDB from "@/lib/db"
+import User from "@/models/User"
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(req) {
   try {
+    await connectDB()
     const authHeader = req.headers.get("authorization")
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return NextResponse.json({ message: "Not authorized, no token" }, { status: 401 })
@@ -26,30 +28,14 @@ export async function GET(req) {
       const decoded = jwt.verify(token, secret)
       const userId = decoded.userId || decoded.id
 
-      // Try to select profile_image_url, but handle if column doesn't exist
-      let { data: user, error } = await supabase
-        .from("users")
-        .select("id, name, email, profile_image_url")
-        .eq("id", userId)
-        .single()
+      const user = await User.findById(userId).select("-password")
 
-      // If error is about missing column, try without profile_image_url
-      if (error && error.message?.includes("profile_image_url")) {
-        const result = await supabase
-          .from("users")
-          .select("id, name, email")
-          .eq("id", userId)
-          .single()
-        user = result.data
-        error = result.error
-      }
-
-      if (error || !user) {
+      if (!user) {
         return NextResponse.json({ message: "User not found" }, { status: 404 })
       }
 
       return NextResponse.json({
-        _id: user.id,
+        _id: user._id,
         name: user.name,
         email: user.email,
         profileImageUrl: user.profile_image_url || null,

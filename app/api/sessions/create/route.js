@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server"
 import jwt from "jsonwebtoken"
-import { supabaseAdmin } from "@/lib/supabase"
+import connectDB from "@/lib/db"
+import Session from "@/models/Session"
+import Question from "@/models/Question"
+import { mockDb } from "@/lib/mock-db"
 
 export const dynamic = "force-dynamic"
 
 export async function POST(req) {
   try {
+    const db = await connectDB()
     const authHeader = req.headers.get("authorization")
     if (!authHeader?.startsWith("Bearer ")) {
       return NextResponse.json({ message: "Not authorized" }, { status: 401 })
@@ -21,64 +25,86 @@ export async function POST(req) {
 
     const { role, experience, topicsToFocus, description, questions } = await req.json()
 
-    const insertData = {
+    // --- MOCK DB MODE ---
+    if (!db) {
+         console.log("Mock DB Mode: Creating session");
+         const newSession = await mockDb.createSession({
+            user_id: userId,
+            role,
+            experience,
+            topics_to_focus: topicsToFocus || "",
+            description: description || "",
+         });
+
+         let createdQuestions = [];
+         if (Array.isArray(questions) && questions.length > 0) {
+            const questionInserts = questions.map((q) => ({
+                session_id: newSession._id,
+                user_id: userId,
+                question: q.question || "",
+                answer: q.answer || "",
+                is_pinned: false,
+            }));
+            createdQuestions = await mockDb.createQuestions(questionInserts);
+         }
+
+         return NextResponse.json({
+            message: "Session created successfully (Mock Mode)",
+            session: {
+                _id: newSession._id,
+                role: newSession.role,
+                experience: newSession.experience,
+                createdAt: newSession.created_at,
+            },
+            questionsCount: createdQuestions.length,
+         })
+    }
+    // --------------------
+
+    // Create Session
+    const newSession = await Session.create({
       user_id: userId,
       role,
       experience,
       topics_to_focus: topicsToFocus || "",
       description: description || "",
-      created_at: new Date().toISOString(),
-    }
-
-    const { data: newSession, error: sessionError } = await supabaseAdmin
-      .from("sessions")
-      .insert(insertData)
-      .select()
-      .single()
-
-    if (sessionError || !newSession) {
-      console.error("Session Insert Error:", sessionError)
-      return NextResponse.json(
-        { message: sessionError?.message || "Could not save session" },
-        { status: 500 }
-      )
-    }
+    })
 
     let createdQuestions = []
     if (Array.isArray(questions) && questions.length > 0) {
       const questionInserts = questions.map((q) => ({
-        session_id: newSession.id,
+        session_id: newSession._id,
         user_id: userId,
         question: q.question || "",
         answer: q.answer || "",
-        created_at: new Date().toISOString(),
+        is_pinned: false,
       }))
 
-      const { data: insertedQuestions, error: questionsError } = await supabaseAdmin
-        .from("questions")
-        .insert(questionInserts)
-        .select()
-
-      if (questionsError) {
-        console.error("Questions creation error:", questionsError)
-      } else if (insertedQuestions) {
-        createdQuestions = insertedQuestions
+      try {
+        createdQuestions = await Question.insertMany(questionInserts)
+      } catch (qError) {
+        console.error("Failed to save questions:", qError)
+        // Rollback: delete the session if questions fail
+        await Session.findByIdAndDelete(newSession._id)
+        return NextResponse.json(
+          { message: "Failed to save questions. Session cancelled." },
+          { status: 500 }
+        )
       }
     }
 
     return NextResponse.json({
-      success: true,
-      session: { 
-        ...newSession, 
-        _id: newSession.id, 
-        questions: createdQuestions 
+      message: "Session created successfully",
+      session: {
+        _id: newSession._id,
+        role: newSession.role,
+        experience: newSession.experience,
+        createdAt: newSession.created_at,
       },
+      questionsCount: createdQuestions.length,
     })
   } catch (error) {
-    console.error("Create Session Error:", error)
-    if (error.name === "JsonWebTokenError") {
-      return NextResponse.json({ message: "Invalid token" }, { status: 401 })
-    }
-    return NextResponse.json({ message: "Server error" }, { status: 500 })
+    console.error("Session creation error:", error)
+    return NextResponse.json({ message: error?.message || "Server error" }, { status: 500 })
   }
 }

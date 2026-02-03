@@ -478,7 +478,7 @@ export function LandingPage() {
               Loved by <span className="text-gradient-primary">Developers Worldwide</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Don't just take our word for it. Here's what successful developers are saying about Interview Prep.
+              Don&apos;t just take our word for it. Here&apos;s what successful developers are saying about Interview Prep.
             </p>
           </div>
 
@@ -514,7 +514,7 @@ export function LandingPage() {
                 </CardHeader>
                 <CardContent className="text-left pt-0">
                   <CardDescription className="text-gray-700 text-base leading-relaxed">
-                    "{testimonial.content}"
+                    &quot;{testimonial.content}&quot;
                   </CardDescription>
                 </CardContent>
               </Card>
@@ -532,7 +532,7 @@ export function LandingPage() {
                 Your Success is Our <span className="text-gradient-secondary">Mission</span>
               </h2>
               <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-                Join thousands of successful developers who've transformed their careers with our revolutionary
+                Join thousands of successful developers who&apos;ve transformed their careers with our revolutionary
                 AI-powered interview preparation platform.
               </p>
               <div className="space-y-4">

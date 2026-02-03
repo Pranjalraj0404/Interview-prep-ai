@@ -8,23 +8,24 @@ export async function GET() {
   try {
     if (!process.env.GEMINI_API_KEY) {
       return NextResponse.json(
-        { error: "GEMINI_API_KEY is not set in environment variables" },
-        { status: 500 }
+        { 
+          message: "GEMINI_API_KEY is missing. Running in Mock Mode.",
+          status: "mock_mode",
+          models: []
+        },
+        { status: 200 }
       );
     }
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     
     // Try to list available models
-    // Note: This might not work with all SDK versions, but we'll try
     const models = [];
     const modelNames = [
-      "gemini-pro",
-      "gemini-1.5-pro",
+      "gemini-2.5-flash",
+      "gemini-2.5-flash-lite",
       "gemini-1.5-flash",
-      "gemini-pro-vision",
-      "models/gemini-pro",
-      "models/gemini-1.5-pro"
+      "gemini-1.5-pro",
     ];
 
     for (const modelName of modelNames) {

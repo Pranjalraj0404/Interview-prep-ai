@@ -23,7 +23,8 @@ export async function POST(request) {
     const topics = body.topicsToFocus || "General";
     const count = Math.max(1, Math.min(parseInt(body.numberOfQuestions) || 10, 25));
 
-    if (!process.env.GEMINI_API_KEY) {
+    if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === "undefined") {
+      console.warn("GEMINI_API_KEY is missing or invalid");
       const fallback = Array.from({ length: count }).map((_, i) => ({
         question: `Draft Q${i + 1}: ${role} • ${topics}`,
         answer: "Generated without AI due to missing API key.",
@@ -33,12 +34,9 @@ export async function POST(request) {
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const modelNames = [
-      "gemini-2.0-flash",
       "gemini-2.5-flash",
-      "gemini-2.5-pro",
-      "gemini-2.0-flash-exp",
+      "gemini-2.5-flash-lite",
       "gemini-1.5-flash",
-      "gemini-pro",
       "gemini-1.5-pro",
     ];
     let model = genAI.getGenerativeModel({ model: modelNames[0] });

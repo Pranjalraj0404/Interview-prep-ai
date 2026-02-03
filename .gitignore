@@ -10,31 +10,9 @@ dist/
 .env.*.local
 .env.example
 
-# ---- Markdown (ignore debug notes only) ----
-ATS_FRIENDLY_POINTS.md
-CHECK_DATABASE.md
-DATABASE_SCHEMA.md
-DEBUG_SESSIONS.md
-FIX_LOGIN.md
-FIX_SESSION_CREATION.md
-FIX_SESSION_DISPLAY.md
-FIX_QUESTIONS_DISPLAY.sql
-FIX_SESSIONS_TABLE.sql
-GEMINI_MODEL_FIX.md
-MODEL_FIX_SUMMARY.md
-PROJECT_REPAIR_SUMMARY.md
-QUICK_FIX.md
-QUICK_FIX_DATABASE.md
-SESSION_DISPLAY_FIX.md
-TEST_DATABASE.md
-TROUBLESHOOTING.md
-file_list.txt
-folder-structure.txt
-
-NPM_SETUP_GUIDE.md
-QUICK_START.md
-SUPABASE_SETUP.md
-SETUP_LOCAL.md
+# ---- Markdown (Ignore all except README) ----
+*.md
+!README.md
 
 # ---- System files ----
 .DS_Store
@@ -51,6 +29,7 @@ Thumbs.db
 *.db
 *.db-shm
 *.db-wal
+data/
 
 # ---- Debug / Test Scripts ----
 check-models.js
@@ -62,5 +41,3 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-.env.example 
-.env.example 

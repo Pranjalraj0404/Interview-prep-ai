@@ -64,29 +64,23 @@ export async function POST(request) {
 
     // Check if API key is available
     if (!process.env.GEMINI_API_KEY) {
-      return NextResponse.json(
-        {
-          error: "Server misconfigured: missing API key",
-          message: "Gemini API key is not configured. Please add GEMINI_API_KEY to your environment variables.",
-        },
-        { status: 500 }
-      );
+      console.warn("GEMINI_API_KEY missing. Returning mock explanation.");
+      return NextResponse.json({
+        title: "Mock Explanation (Dev Mode)",
+        explanation: "This is a simulated explanation because the GEMINI_API_KEY is missing. In a real environment, this would be a detailed AI-generated explanation of the concept."
+      });
     }
 
     // Initialize Gemini AI
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     
     // Try multiple model names in order of preference
-    // Updated to use newer models that are actually available
-    // Based on API key access, these models work: gemini-2.0-flash, gemini-2.5-flash, gemini-2.5-pro
+    // Prioritizing newer models (Gemini 2.5) as Gemini 2.0 Flash/Lite are being discontinued
     const modelNames = [
-      "gemini-2.0-flash",          // Stable flash model (confirmed working)
-      "gemini-2.5-flash",          // Latest flash model (confirmed working)
-      "gemini-2.5-pro",            // Latest pro model (confirmed working)
-      "gemini-2.0-flash-exp",      // Experimental (may have quota limits)
-      "gemini-1.5-flash",          // Fallback to older models
-      "gemini-pro",                // Legacy fallback
-      "gemini-1.5-pro",            // Legacy fallback
+      "gemini-2.5-flash",          // Newest, Fast
+      "gemini-2.5-flash-lite",     // Newest, Lighter
+      "gemini-1.5-flash",          // Stable, Fast, Cost-effective
+      "gemini-1.5-pro",            // Stable, High capability
     ];
     
     // Initialize model (this doesn't validate availability, but we'll catch errors in generateContent)

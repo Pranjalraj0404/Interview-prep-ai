@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server"
 import jwt from "jsonwebtoken"
-import { supabase } from "@/lib/supabase"
+import connectDB from "@/lib/db"
+import Question from "@/models/Question"
+import Session from "@/models/Session"
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(req, { params }) {
   try {
+    await connectDB()
     const authHeader = req.headers.get("authorization")
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return NextResponse.json({ message: "Not authorized" }, { status: 401 })
@@ -25,48 +28,34 @@ export async function POST(req, { params }) {
     const { id } = params
 
     // Get question
-    const { data: question, error: questionError } = await supabase
-      .from("questions")
-      .select("*")
-      .eq("id", id)
-      .single()
+    const question = await Question.findById(id)
 
-    if (questionError || !question) {
+    if (!question) {
       return NextResponse.json({ message: "Question not found" }, { status: 404 })
     }
 
     // Get session to verify ownership
-    const { data: session, error: sessionError } = await supabase
-      .from("sessions")
-      .select("user_id")
-      .eq("id", question.session_id)
-      .single()
+    const session = await Session.findById(question.session_id)
 
-    if (sessionError || !session) {
+    if (!session) {
       return NextResponse.json({ message: "Session not found" }, { status: 404 })
     }
 
     // Verify session ownership
-    if (session.user_id !== userId) {
+    if (session.user_id.toString() !== userId) {
       return NextResponse.json({ message: "Not authorized" }, { status: 401 })
     }
 
     // Toggle pin status
-    const { data: updatedQuestion, error: updateError } = await supabase
-      .from("questions")
-      .update({ is_pinned: !question.is_pinned })
-      .eq("id", id)
-      .select()
-      .single()
+    question.is_pinned = !question.is_pinned
+    await question.save()
 
-    if (updateError || !updatedQuestion) {
-      console.error("Pin toggle error:", updateError)
-      return NextResponse.json({ message: "Failed to toggle pin" }, { status: 500 })
-    }
-
-    return NextResponse.json({ success: true, question: updatedQuestion })
+    return NextResponse.json({ 
+      success: true, 
+      isPinned: question.is_pinned 
+    })
   } catch (error) {
-    console.error("Pin toggle error:", error)
+    console.error("Pin error:", error)
     return NextResponse.json({ message: error?.message || "Server error" }, { status: 500 })
   }
 }

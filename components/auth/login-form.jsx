@@ -165,7 +165,7 @@ export function LoginForm() {
               </Button>
 
               <div className="text-center pt-6">
-                <p className="text-gray-600 mb-6 text-lg">Don't have an account?</p>
+                <p className="text-gray-600 mb-6 text-lg">Don&apos;t have an account?</p>
                 <Button
                   variant="outline"
                   asChild

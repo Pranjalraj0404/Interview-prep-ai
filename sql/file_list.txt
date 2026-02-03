@@ -1,0 +1,2 @@
+D:\k\Interview-prep-ai\sql\file_list.txt
+D:\k\Interview-prep-ai\sql\FIX_SESSIONS_TABLE.sql

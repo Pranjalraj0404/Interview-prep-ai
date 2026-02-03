@@ -6,7 +6,7 @@ import * as RechartsPrimitive from "recharts"
 import { cn } from "@/lib/utils"
 
 // Format: { THEME_NAME: CSS_SELECTOR }
-const THEMES = { light: "", dark: ".dark" } as const
+const THEMES = { light: "", dark: ".dark" }
 
 const ChartContext = React.createContext(null)
 
@@ -45,7 +45,7 @@ const ChartContainer = React.forwardRef(({ id, className, children, config, ...p
 })
 ChartContainer.displayName = "Chart"
 
-const ChartStyle = ({ id, config }: { id) => {
+const ChartStyle = ({ id, config }) => {
   const colorConfig = Object.entries(config).filter(
     ([_, config]) => config.theme || config.color
   )
@@ -189,7 +189,7 @@ const ChartTooltipContent = React.forwardRef(
                             {
                               "--color-bg": indicatorColor,
                               "--color-border": indicatorColor,
-                            } as React.CSSProperties
+                            }
                           }
                         />
                       )
@@ -279,8 +279,8 @@ ChartLegendContent.displayName = "ChartLegend"
 
 // Helper to extract item config from a payload.
 function getPayloadConfigFromPayload(
-  config: ChartConfig,
-  payload: unknown,
+  config,
+  payload,
   key) {
   if (typeof payload !== "object" || payload === null) {
     return undefined

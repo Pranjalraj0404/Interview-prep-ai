@@ -34,11 +34,14 @@ export function AuthProvider({ children }) {
         const userData = await response.json()
         setUser(userData)
       } else {
-        localStorage.removeItem("token")
+        // Only remove token if it's an auth error (401/403)
+        if (response.status === 401 || response.status === 403) {
+          localStorage.removeItem("token")
+        }
       }
     } catch (error) {
       console.error("Error fetching user profile:", error)
-      localStorage.removeItem("token")
+      // Do not remove token on network errors
     } finally {
       setLoading(false)
     }

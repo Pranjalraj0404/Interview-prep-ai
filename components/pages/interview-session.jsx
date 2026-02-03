@@ -121,9 +121,9 @@ export function InterviewSession({ sessionId }) {
           if (!prev) return prev
           return {
             ...prev,
-            questions: prev.questions.map((q) => (
-              q._id === questionId ? { ...q, isPinned: !!data.question.is_pinned } : q,
-            )),
+            questions: prev.questions.map((q) =>
+              q._id === questionId ? { ...q, isPinned: !!data.question.is_pinned } : q
+            ),
           }
         })
         toast({

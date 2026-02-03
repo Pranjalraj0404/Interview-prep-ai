@@ -81,7 +81,7 @@ const SidebarProvider = React.forwardRef(
 
     // Adds a keyboard shortcut to toggle the sidebar.
     React.useEffect(() => {
-      const handleKeyDown = (event: KeyboardEvent) => {
+      const handleKeyDown = (event) => {
         if (
           event.key === SIDEBAR_KEYBOARD_SHORTCUT &&
           (event.metaKey || event.ctrlKey)
@@ -99,7 +99,7 @@ const SidebarProvider = React.forwardRef(
     // This makes it easier to style the sidebar with Tailwind classes.
     const state = open ? "expanded" : "collapsed"
 
-    const contextValue = React.useMemo<SidebarContext>(
+    const contextValue = React.useMemo(
       () => ({
         state,
         open,
@@ -121,7 +121,7 @@ const SidebarProvider = React.forwardRef(
                 "--sidebar-width": SIDEBAR_WIDTH,
                 "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
                 ...style,
-              } as React.CSSProperties
+              }
             }
             className={cn(
               "group/sidebar-wrapper flex min-h-svh w-full has-[[data-variant=inset]]:bg-sidebar",
@@ -178,7 +178,7 @@ const Sidebar = React.forwardRef(
             style={
               {
                 "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
-              } as React.CSSProperties
+              }
             }
             side={side}
           >
@@ -587,7 +587,7 @@ const SidebarMenuSkeleton = React.forwardRef(({ className, showIcon = false, ...
         style={
           {
             "--skeleton-width": width,
-          } as React.CSSProperties
+          }
         }
       />
     </div>

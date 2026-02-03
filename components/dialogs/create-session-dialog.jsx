@@ -15,69 +15,69 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export function CreateSessionDialog({ open, onOpenChange, onSessionCreated }) {
   const [formData, setFormData] = useState({
-    role: "",
-    experience: "",
-    topicsToFocus: "",
-    description: "",
-    numberOfQuestions: "10",
-  })
+    role: "",
+    experience: "",
+    topicsToFocus: "",
+    description: "",
+    numberOfQuestions: "10",
+  })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const { toast } = useToast()
   const router = useRouter()
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
 
-    try {
-      // First, generate questions using AI
-      const token = localStorage.getItem("token")
-      const questionsResponse = await fetch("/api/ai/generate-questions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          role: formData.role,
-          experience: formData.experience,
-          topicsToFocus: formData.topicsToFocus,
-          numberOfQuestions: parseInt(formData.numberOfQuestions),
-        }),
-      })
+    try {
+      // First, generate questions using AI
+      const token = localStorage.getItem("token")
+      const questionsResponse = await fetch("/api/ai/generate-questions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          role: formData.role,
+          experience: formData.experience,
+          topicsToFocus: formData.topicsToFocus,
+          numberOfQuestions: parseInt(formData.numberOfQuestions),
+        }),
+      })
 
-      if (!questionsResponse.ok) {
-        const errorData = await questionsResponse.json().catch(() => ({}))
-        throw new Error(errorData.message || errorData.error || "Failed to generate questions")
-      }
+      if (!questionsResponse.ok) {
+        const errorData = await questionsResponse.json().catch(() => ({}))
+        throw new Error(errorData.message || errorData.error || "Failed to generate questions")
+      }
 
-      const questions = await questionsResponse.json()
+      const questions = await questionsResponse.json()
 
-      // Validate that we actually got questions
-      if (!Array.isArray(questions) || questions.length === 0) {
-        throw new Error("No questions were generated. Please try again.")
-      }
+      // Validate that we actually got questions
+      if (!Array.isArray(questions) || questions.length === 0) {
+        throw new Error("No questions were generated. Please try again.")
+      }
 
-      // Then create the session with the generated questions
-      const sessionResponse = await fetch("/api/sessions/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          ...formData,
-          questions,
-        }),
-      })
+      // Then create the session with the generated questions
+      const sessionResponse = await fetch("/api/sessions/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          ...formData,
+          questions,
+        }),
+      })
 
-      if (!sessionResponse.ok) {
-        const errorData = await sessionResponse.json().catch(() => ({}))
-        const errorMessage = errorData.message || "Failed to create session"
-        throw new Error(errorMessage)
-      }
+      if (!sessionResponse.ok) {
+        const errorData = await sessionResponse.json().catch(() => ({}))
+        const errorMessage = errorData.message || "Failed to create session"
+        throw new Error(errorMessage)
+      }
 
       const created = await sessionResponse.json()
       const newSession = created?.session
@@ -97,7 +97,7 @@ export function CreateSessionDialog({ open, onOpenChange, onSessionCreated }) {
         description: "",
         numberOfQuestions: "10",
       })
-    } catch (error) {
+    } catch (error) {
       console.error("Error creating session:", error)
       const errorMessage = error instanceof Error ? error.message : "Failed to create session"
       setError(errorMessage)

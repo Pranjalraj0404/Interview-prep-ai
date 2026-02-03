@@ -30,6 +30,8 @@ export function Dashboard() {
 
   useEffect(() => {
     if (user) fetchSessions()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  
   }, [user])
 
   const fetchSessions = async () => {
