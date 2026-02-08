@@ -72,7 +72,8 @@ Secure login flow with JWT-based authentication.
 ### 🔹 Interview Setup / Query Input
 Users provide role, job description, or topic to generate interview questions.
 
-![Interview Setup](./Images/query.png)
+![Interview Setup](./Images/querry.png)
+![Interview Setup](./Images/q.png)
 
 ---
 
