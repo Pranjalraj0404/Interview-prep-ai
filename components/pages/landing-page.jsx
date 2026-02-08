@@ -330,7 +330,7 @@ export function LandingPage() {
                   modal.innerHTML = `
         <div class="relative w-full max-w-4xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl">
           <iframe
-            src="https://www.youtube.com/embed/y_IvcxH6bp8?autoplay=1&start=0&controls=1&modestbranding=1&rel=0"
+            src="https://youtu.be/SxhGG60uTps"
             title="Interview Prep AI Demo"
             class="w-full h-full"
             frameborder="0"
